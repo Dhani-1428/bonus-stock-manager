@@ -174,7 +174,7 @@ function FeatureCard({ feature, index }: { feature: typeof features[0]; index: n
         delay: index * 0.1,
         ease: [0.21, 1.11, 0.81, 0.99],
       }}
-      className="h-full"
+      className="h-full m-2 sm:m-3"
       style={{ perspective: 1000 }}
     >
       <CardSpotlight 
@@ -184,7 +184,7 @@ function FeatureCard({ feature, index }: { feature: typeof features[0]; index: n
         onMouseMove={handleCard3D}
         onMouseLeave={resetCard3D}
       >
-        <div className="relative z-20 p-6">
+        <div className="relative z-20 p-6 sm:p-8">
           {/* Icon with gradient background */}
           <motion.div
             className={`w-14 h-14 rounded-xl bg-gradient-to-br ${feature.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg`}
