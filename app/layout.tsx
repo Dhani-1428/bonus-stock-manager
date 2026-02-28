@@ -56,27 +56,33 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const clerkPublishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+
   return (
-    <ClerkProvider>
-      <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
-        <body className="font-sans antialiased min-h-screen relative overflow-x-hidden">
-          {children}
-          <Analytics />
-          <script
-            dangerouslySetInnerHTML={{
-              __html: `
-                if ('serviceWorker' in navigator) {
-                  window.addEventListener('load', () => {
-                    navigator.serviceWorker.register('/sw.js')
-                      .then((reg) => console.log('SW registered', reg))
-                      .catch((err) => console.log('SW registration failed', err));
-                  });
-                }
-              `,
-            }}
-          />
-        </body>
-      </html>
-    </ClerkProvider>
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
+      <body className="font-sans antialiased min-h-screen relative overflow-x-hidden">
+        {clerkPublishableKey ? (
+          <ClerkProvider>
+            {children}
+          </ClerkProvider>
+        ) : (
+          children
+        )}
+        <Analytics />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                  navigator.serviceWorker.register('/sw.js')
+                    .then((reg) => console.log('SW registered', reg))
+                    .catch((err) => console.log('SW registration failed', err));
+                });
+              }
+            `,
+          }}
+        />
+      </body>
+    </html>
   )
 }

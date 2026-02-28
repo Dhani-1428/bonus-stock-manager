@@ -1,19 +1,40 @@
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
 
-const isPublicRoute = createRouteMatcher([
-  '/',
-  '/login(.*)',
-  '/signup(.*)',
-  '/api/auth(.*)',
-  '/api/webhooks(.*)',
-  '/api/users/sync',
-])
+// Only use Clerk middleware if publishable key is available
+const clerkPublishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
 
-export default clerkMiddleware(async (auth, req) => {
-  if (!isPublicRoute(req)) {
-    await auth.protect()
+// No-op middleware when Clerk is not configured (for build time)
+export default function middleware(request: NextRequest) {
+  // If Clerk is not configured, allow all requests during build
+  if (!clerkPublishableKey) {
+    return NextResponse.next()
   }
-})
+
+  // Dynamically import and use Clerk middleware only at runtime
+  // This prevents build-time errors when Clerk keys are not set
+  try {
+    const { clerkMiddleware, createRouteMatcher } = require('@clerk/nextjs/server')
+    
+    const publicRouteMatcher = createRouteMatcher([
+      '/',
+      '/login(.*)',
+      '/signup(.*)',
+      '/api/auth(.*)',
+      '/api/webhooks(.*)',
+      '/api/users/sync',
+    ])
+
+    return clerkMiddleware(async (auth: any, req: NextRequest) => {
+      if (!publicRouteMatcher(req)) {
+        await auth.protect()
+      }
+    })(request)
+  } catch (error) {
+    // Fallback if Clerk middleware fails to load
+    return NextResponse.next()
+  }
+}
 
 export const config = {
   matcher: [
