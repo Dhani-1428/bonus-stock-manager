@@ -184,23 +184,23 @@ function FeatureCard({ feature, index }: { feature: typeof features[0]; index: n
         onMouseMove={handleCard3D}
         onMouseLeave={resetCard3D}
       >
-        <div className="relative z-20 p-6 sm:p-8">
+        <div className="relative z-20 p-6 sm:p-8 lg:p-10">
           {/* Icon with gradient background */}
           <motion.div
-            className={`w-14 h-14 rounded-xl bg-gradient-to-br ${feature.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg`}
+            className={`w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-gradient-to-br ${feature.color} flex items-center justify-center mb-5 sm:mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg`}
             whileHover={{ rotate: 360 }}
             transition={{ duration: 0.5 }}
           >
-            <Icon className="w-7 h-7 text-white" />
+            <Icon className="w-7 h-7 sm:w-8 sm:h-8 text-white" />
           </motion.div>
 
           {/* Title */}
-          <h3 className="text-lg font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
+          <h3 className="text-lg sm:text-xl font-bold text-foreground mb-3 sm:mb-4 group-hover:text-primary transition-colors">
             {feature.title}
           </h3>
 
           {/* Description */}
-          <p className="text-sm text-muted-foreground leading-relaxed">
+          <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
             {feature.description}
           </p>
         </div>
