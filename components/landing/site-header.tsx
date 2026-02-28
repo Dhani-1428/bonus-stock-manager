@@ -1,8 +1,9 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import { Package, Menu, X, Globe } from "lucide-react"
+import { motion, useMotionValue, useSpring, useTransform } from "framer-motion"
 
 const navLinks = [
   { href: "#about", label: "About" },
@@ -13,9 +14,61 @@ const navLinks = [
   { href: "#contact", label: "Contact" },
 ]
 
+function NavItem({ link, mouseX, onNavClick }: { link: typeof navLinks[0]; mouseX: ReturnType<typeof useMotionValue<number>>; onNavClick: (e: React.MouseEvent<HTMLAnchorElement>, href: string) => void }) {
+  const [isHovered, setIsHovered] = useState(false)
+  const ref = useRef<HTMLAnchorElement>(null)
+
+  const springConfig = { stiffness: 500, damping: 30 }
+  const scale = useSpring(1, springConfig)
+  const rotate = useSpring(0, springConfig)
+
+  const distance = useTransform(mouseX, (val) => {
+    const bounds = ref.current?.getBoundingClientRect() ?? { x: 0, width: 0 }
+    return val - bounds.x - bounds.width / 2
+  })
+
+  const widthSync = useTransform(distance, [-150, 0, 150], [1, 1.1, 1])
+  const width = useSpring(widthSync, springConfig)
+
+  useEffect(() => {
+    if (isHovered) {
+      scale.set(1.1)
+      rotate.set(2)
+    } else {
+      scale.set(1)
+      rotate.set(0)
+    }
+  }, [isHovered, scale, rotate])
+
+  return (
+    <motion.a
+      ref={ref}
+      href={link.href}
+      onClick={(e) => onNavClick(e, link.href)}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      style={{ scale, rotate, width }}
+      className="relative text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer px-3 py-2 rounded-lg hover:bg-secondary/30 flex items-center justify-center"
+    >
+      <motion.span style={{ scale }}>{link.label}</motion.span>
+      {isHovered && (
+        <motion.div
+          initial={{ opacity: 0, y: 10, x: "-50%" }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 10 }}
+          className="absolute -top-10 left-1/2 -translate-x-1/2 whitespace-pre rounded-lg border border-border bg-popover px-2.5 py-1 text-xs font-medium text-popover-foreground shadow-lg backdrop-blur-sm z-50"
+        >
+          {link.label}
+        </motion.div>
+      )}
+    </motion.a>
+  )
+}
+
 export function SiteHeader() {
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const mouseX = useMotionValue(Infinity)
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20)
@@ -77,16 +130,13 @@ export function SiteHeader() {
           </Link>
 
           {/* Desktop nav */}
-          <nav className="hidden lg:flex items-center gap-8">
+          <nav 
+            className="hidden lg:flex items-center gap-2"
+            onMouseMove={(e) => mouseX.set(e.clientX)}
+            onMouseLeave={() => mouseX.set(Infinity)}
+          >
             {navLinks.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                onClick={(e) => handleNavClick(e, link.href)}
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
-              >
-                {link.label}
-              </a>
+              <NavItem key={link.href} link={link} mouseX={mouseX} onNavClick={handleNavClick} />
             ))}
           </nav>
 
