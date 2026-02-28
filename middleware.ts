@@ -5,7 +5,7 @@ import type { NextRequest } from 'next/server'
 const clerkPublishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
 
 // No-op middleware when Clerk is not configured (for build time)
-export default function middleware(request: NextRequest) {
+export default async function middleware(request: NextRequest) {
   // If Clerk is not configured, allow all requests during build
   if (!clerkPublishableKey) {
     return NextResponse.next()
@@ -14,7 +14,7 @@ export default function middleware(request: NextRequest) {
   // Dynamically import and use Clerk middleware only at runtime
   // This prevents build-time errors when Clerk keys are not set
   try {
-    const { clerkMiddleware, createRouteMatcher } = require('@clerk/nextjs/server')
+    const { clerkMiddleware, createRouteMatcher } = await import('@clerk/nextjs/server')
     
     const publicRouteMatcher = createRouteMatcher([
       '/',
@@ -25,15 +25,20 @@ export default function middleware(request: NextRequest) {
       '/api/users/sync',
     ])
 
-    return clerkMiddleware(async (auth: any, req: NextRequest) => {
-      if (!publicRouteMatcher(req)) {
-        await auth.protect()
+    const { auth } = await import('@clerk/nextjs/server')
+    const authResult = await auth()
+    
+    if (!publicRouteMatcher(request)) {
+      if (!authResult.userId) {
+        return NextResponse.redirect(new URL('/login', request.url))
       }
-    })(request)
+    }
   } catch (error) {
     // Fallback if Clerk middleware fails to load
-    return NextResponse.next()
+    console.error('Clerk middleware error:', error)
   }
+
+  return NextResponse.next()
 }
 
 export const config = {
