@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
+import { motion, useScroll, useTransform } from "framer-motion"
 import {
   ScanBarcode,
   BarChart3,
@@ -137,34 +138,28 @@ const features = [
 ]
 
 export function FeaturesSection() {
-  const [visibleCards, setVisibleCards] = useState<Set<number>>(new Set())
-  const cardsRef = useRef<(HTMLDivElement | null)[]>([])
+  const containerRef = useRef<HTMLDivElement>(null)
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end start"],
+  })
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const index = Number(entry.target.getAttribute("data-index"))
-            setVisibleCards((prev) => new Set([...prev, index]))
-          }
-        })
-      },
-      { threshold: 0.15 }
-    )
-
-    cardsRef.current.forEach((el) => {
-      if (el) observer.observe(el)
-    })
-
-    return () => observer.disconnect()
-  }, [])
+  const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0, 1, 1, 0])
+  const scale = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0.8, 1, 1, 0.8])
+  const y = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [100, 0, 0, -100])
 
   return (
-    <section id="features" className="relative py-24 lg:py-32 scroll-mt-24">
+    <section 
+      id="features" 
+      className="relative py-24 lg:py-32 scroll-mt-24 overflow-hidden"
+      ref={containerRef}
+    >
       <div className="max-w-7xl mx-auto px-6">
         {/* Section heading */}
-        <div className="text-center mb-16">
+        <motion.div 
+          className="text-center mb-16"
+          style={{ opacity, scale, y }}
+        >
           <p className="text-sm font-semibold text-primary uppercase tracking-wider mb-3">
             Features
           </p>
@@ -175,36 +170,48 @@ export function FeaturesSection() {
             From barcode scanning to detailed analytics, StockPulse gives you the
             complete toolkit to manage inventory like a pro.
           </p>
-        </div>
+        </motion.div>
 
-        {/* Features grid - Responsive card layout */}
+        {/* Features grid - Responsive card layout with scroll animations */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {features.map((feature, i) => {
             const Icon = feature.icon
+            
+            // Calculate scroll progress for each card
+            const cardScrollProgress = useTransform(
+              scrollYProgress,
+              [i * 0.05, (i + 1) * 0.05],
+              [0, 1]
+            )
+            
+            const cardOpacity = useTransform(cardScrollProgress, [0, 0.3, 0.7, 1], [0, 1, 1, 1])
+            const cardScale = useTransform(cardScrollProgress, [0, 0.3, 0.7, 1], [0.8, 1, 1, 1])
+            const cardY = useTransform(cardScrollProgress, [0, 0.3, 0.7, 1], [50, 0, 0, 0])
+            const cardRotate = useTransform(cardScrollProgress, [0, 0.3, 0.7, 1], [5, 0, 0, 0])
+
             return (
-              <div
+              <motion.div
                 key={feature.title}
-                ref={(el) => {
-                  cardsRef.current[i] = el
+                style={{
+                  opacity: cardOpacity,
+                  scale: cardScale,
+                  y: cardY,
+                  rotateX: cardRotate,
                 }}
-                data-index={i}
-                className={`transition-all duration-500 ${
-                  visibleCards.has(i)
-                    ? "opacity-100 translate-y-0"
-                    : "opacity-0 translate-y-8"
-                }`}
-                style={{ transitionDelay: `${i * 50}ms` }}
+                className="h-full"
               >
                 <CardSpotlight
                   className="group h-full hover:neon-glow cursor-default transition-all duration-300"
                 >
-                  <div className="relative z-20">
+                  <div className="relative z-20 p-6">
                     {/* Icon with gradient background */}
-                    <div 
+                    <motion.div 
                       className={`w-14 h-14 rounded-xl bg-gradient-to-br ${feature.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg`}
+                      whileHover={{ rotate: 360 }}
+                      transition={{ duration: 0.5 }}
                     >
                       <Icon className="w-7 h-7 text-white" />
-                    </div>
+                    </motion.div>
                     
                     {/* Title */}
                     <h3 className="text-lg font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
@@ -217,7 +224,7 @@ export function FeaturesSection() {
                     </p>
                   </div>
                 </CardSpotlight>
-              </div>
+              </motion.div>
             )
           })}
         </div>
