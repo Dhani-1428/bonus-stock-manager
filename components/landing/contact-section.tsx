@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Mail, Phone, MapPin, Send } from "lucide-react"
 import Link from "next/link"
-import { CardSpotlight } from "@/components/ui/card-spotlight"
+import { GlareCard } from "@/components/ui/glare-card"
 
 export function ContactSection() {
   const [formData, setFormData] = useState({
@@ -49,7 +49,7 @@ export function ContactSection() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 perspective-3d">
           {/* Contact Info */}
           <div className="flex flex-col gap-6">
-            <CardSpotlight className="hover:neon-glow transition-all">
+            <GlareCard className="hover:neon-glow transition-all">
               <div className="flex items-start gap-4 relative z-20">
                 <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                   <Mail className="w-6 h-6 text-primary" />
@@ -66,9 +66,9 @@ export function ContactSection() {
                   </Link>
                 </div>
               </div>
-            </CardSpotlight>
+            </GlareCard>
 
-            <CardSpotlight className="hover:neon-glow transition-all">
+            <GlareCard className="hover:neon-glow transition-all">
               <div className="flex items-start gap-4 relative z-20">
                 <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                   <Phone className="w-6 h-6 text-primary" />
@@ -85,9 +85,9 @@ export function ContactSection() {
                   </Link>
                 </div>
               </div>
-            </CardSpotlight>
+            </GlareCard>
 
-            <CardSpotlight className="hover:neon-glow transition-all">
+            <GlareCard className="hover:neon-glow transition-all">
               <div className="flex items-start gap-4 relative z-20">
                 <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                   <MapPin className="w-6 h-6 text-primary" />
@@ -103,11 +103,11 @@ export function ContactSection() {
                   </p>
                 </div>
               </div>
-            </CardSpotlight>
+            </GlareCard>
           </div>
 
           {/* Contact Form */}
-          <CardSpotlight className="p-6 lg:p-8">
+          <GlareCard className="p-6 lg:p-8">
             <form onSubmit={handleSubmit} className="flex flex-col gap-5 relative z-20">
               <div>
                 <label
@@ -174,7 +174,7 @@ export function ContactSection() {
                 <Send className="w-4 h-4" />
               </button>
             </form>
-          </CardSpotlight>
+          </GlareCard>
         </div>
       </div>
     </section>

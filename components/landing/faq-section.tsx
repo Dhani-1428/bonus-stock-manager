@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { ChevronDown } from "lucide-react"
-import { CardSpotlight } from "@/components/ui/card-spotlight"
+import { GlareCard } from "@/components/ui/glare-card"
 
 const faqs = [
   {
@@ -73,7 +73,7 @@ export function FAQSection() {
         {/* FAQ Items */}
         <div className="flex flex-col gap-4 perspective-3d">
           {faqs.map((faq, index) => (
-            <CardSpotlight
+            <GlareCard
               key={index}
               className="overflow-hidden transition-all hover:neon-glow"
             >
@@ -101,7 +101,7 @@ export function FAQSection() {
                   </p>
                 </div>
               </div>
-            </CardSpotlight>
+            </GlareCard>
           ))}
         </div>
       </div>

@@ -2,13 +2,13 @@
 
 import Link from "next/link"
 import { ArrowRight } from "lucide-react"
-import { CardSpotlight } from "@/components/ui/card-spotlight"
+import { GlareCard } from "@/components/ui/glare-card"
 
 export function CTASection() {
   return (
     <section className="relative py-24 lg:py-32">
       <div className="max-w-4xl mx-auto px-6 text-center perspective-3d">
-        <CardSpotlight className="p-10 md:p-16 neon-glow relative overflow-hidden">
+        <GlareCard className="p-10 md:p-16 neon-glow relative overflow-hidden">
           {/* Background accent */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-primary/10 rounded-full blur-3xl z-0" />
 
@@ -36,7 +36,7 @@ export function CTASection() {
               </Link>
             </div>
           </div>
-        </CardSpotlight>
+        </GlareCard>
       </div>
     </section>
   )
