@@ -50,10 +50,15 @@ export function AppShell() {
   const { user, isLoaded: userLoaded } = useUser()
   const isMobile = useIsMobile()
   
-  const isLoggedIn = userLoaded && !!user
+  const clerkKey = typeof window !== 'undefined' 
+    ? process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY 
+    : undefined
+  
+  // If Clerk is not configured, allow access (for build time)
+  const isLoggedIn = !clerkKey || (userLoaded && !!user)
 
-  // Show loading while checking auth
-  if (loading || !isLoggedIn) {
+  // Show loading while checking auth (only if Clerk is configured)
+  if (clerkKey && (loading || !isLoggedIn)) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />

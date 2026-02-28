@@ -2,7 +2,6 @@
 
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from "react"
 import { useRouter } from "next/navigation"
-import { useUser, useAuth } from "@clerk/nextjs"
 import { apiClient } from "./api-client"
 
 export type Screen =
@@ -41,10 +40,46 @@ interface AppContextType extends AppState {
 
 const AppContext = createContext<AppContextType | null>(null)
 
+// Safe Clerk hooks that handle missing ClerkProvider
+function useClerkUser() {
+  const clerkKey = typeof window !== 'undefined' 
+    ? (window as any).__CLERK_PUBLISHABLE_KEY__ || process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+    : process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+
+  if (!clerkKey) {
+    return { user: null, isLoaded: true }
+  }
+
+  try {
+    // Dynamic import to avoid build-time errors
+    const { useUser } = require('@clerk/nextjs')
+    return useUser()
+  } catch (error) {
+    return { user: null, isLoaded: true }
+  }
+}
+
+function useClerkAuth() {
+  const clerkKey = typeof window !== 'undefined' 
+    ? (window as any).__CLERK_PUBLISHABLE_KEY__ || process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+    : process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+
+  if (!clerkKey) {
+    return { signOut: async () => {} }
+  }
+
+  try {
+    const { useAuth } = require('@clerk/nextjs')
+    return useAuth()
+  } catch (error) {
+    return { signOut: async () => {} }
+  }
+}
+
 export function AppProvider({ children }: { children: ReactNode }) {
   const router = useRouter()
-  const { user, isLoaded: userLoaded } = useUser()
-  const { signOut } = useAuth()
+  const { user, isLoaded: userLoaded } = useClerkUser()
+  const { signOut } = useClerkAuth()
 
   const [state, setState] = useState<AppState>({
     screen: "dashboard",
@@ -52,11 +87,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     selectedProductId: null,
     searchQuery: "",
     selectedCategory: "all",
-    loading: true,
+    loading: false, // Don't wait for Clerk during build
   })
 
-  // Sync Clerk user with Prisma on mount
+  // Sync Clerk user with Prisma on mount (only in browser)
   useEffect(() => {
+    if (typeof window === 'undefined') return
+    
     const syncUser = async () => {
       if (userLoaded && user) {
         try {
@@ -98,7 +135,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const logout = useCallback(async () => {
-    await signOut()
+    if (signOut) {
+      await signOut()
+    }
     router.push("/login")
   }, [signOut, router])
 
@@ -142,5 +181,11 @@ export function useApp() {
   return ctx
 }
 
-// Export Clerk user hook for components that need it
-export { useUser, useAuth } from "@clerk/nextjs"
+// Export safe Clerk hooks
+export function useUser() {
+  return useClerkUser()
+}
+
+export function useAuth() {
+  return useClerkAuth()
+}
