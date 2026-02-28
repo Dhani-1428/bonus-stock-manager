@@ -40,3 +40,7 @@ yarn-error.log*
 dist/
 build/
 out/
+
+# Lock files (keep package-lock.json, ignore pnpm/yarn)
+pnpm-lock.yaml
+yarn.lock
