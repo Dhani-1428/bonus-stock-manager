@@ -1,0 +1,290 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  OWNER
+  STAFF
+}
+
+enum PaymentMode {
+  CASH
+  UPI
+  CARD
+  BANK_TRANSFER
+}
+
+enum RepairStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  DELIVERED
+  CANCELLED
+}
+
+enum TransactionType {
+  PURCHASE
+  SALE
+  RETURN
+  REFUND
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      UserRole @default(STAFF)
+  phone     String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sales        Sale[]
+  purchases    Purchase[]
+  serviceJobs  ServiceJob[]
+  transactions Transaction[]
+}
+
+model Category {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  icon        String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  products Product[]
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  brand       String?
+  categoryId  String
+  barcode     String?  @unique
+  qrCode      String?  @unique
+  sku         String   @unique
+  imei        String?
+  serialNo    String?
+  
+  // Pricing
+  buyPrice    Float
+  sellPrice   Float
+  mrp         Float?
+  
+  // Stock
+  stock       Int      @default(0)
+  minStock    Int      @default(5)
+  maxStock    Int?
+  
+  // Variants
+  color       String?
+  storage     String?
+  ram         String?
+  variant     String?  // JSON string for custom variants
+  
+  // Details
+  description String?
+  warranty    String?
+  expiryDate  DateTime?
+  image       String?
+  
+  // Supplier
+  supplierId  String?
+  
+  // Metadata
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  category    Category  @relation(fields: [categoryId], references: [id])
+  supplier    Supplier? @relation(fields: [supplierId], references: [id])
+  saleItems      SaleItem[]
+  purchaseItems  PurchaseItem[]
+  serviceItems   ServiceItem[]
+  stockMovements StockMovement[]
+}
+
+model Supplier {
+  id          String   @id @default(cuid())
+  name        String
+  email       String?
+  phone       String?
+  address     String?
+  gstin       String?
+  pan         String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  products    Product[]
+  purchases   Purchase[]
+  transactions Transaction[]
+}
+
+model Customer {
+  id          String   @id @default(cuid())
+  name        String
+  phone       String   @unique
+  email       String?
+  address     String?
+  gstin       String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  sales       Sale[]
+  serviceJobs ServiceJob[]
+}
+
+model Sale {
+  id            String      @id @default(cuid())
+  invoiceNo     String      @unique
+  customerId    String?
+  userId        String
+  totalAmount   Float
+  discount      Float       @default(0)
+  tax           Float       @default(0)
+  finalAmount   Float
+  paymentMode   PaymentMode @default(CASH)
+  paymentStatus String      @default("paid") // paid, pending, partial
+  notes         String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  customer      Customer?   @relation(fields: [customerId], references: [id])
+  user          User        @relation(fields: [userId], references: [id])
+  items         SaleItem[]
+  transactions  Transaction[]
+}
+
+model SaleItem {
+  id          String  @id @default(cuid())
+  saleId      String
+  productId   String
+  quantity    Int
+  unitPrice   Float
+  discount    Float   @default(0)
+  total       Float
+  createdAt   DateTime @default(now())
+
+  sale        Sale    @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  product     Product @relation(fields: [productId], references: [id])
+}
+
+model Purchase {
+  id            String   @id @default(cuid())
+  invoiceNo     String   @unique
+  supplierId    String
+  userId        String
+  totalAmount   Float
+  discount      Float    @default(0)
+  tax           Float    @default(0)
+  finalAmount   Float
+  paymentStatus String   @default("pending") // paid, pending, partial
+  dueDate       DateTime?
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  supplier      Supplier @relation(fields: [supplierId], references: [id])
+  user          User     @relation(fields: [userId], references: [id])
+  items         PurchaseItem[]
+  transactions  Transaction[]
+}
+
+model PurchaseItem {
+  id          String   @id @default(cuid())
+  purchaseId  String
+  productId   String
+  quantity    Int
+  unitPrice   Float
+  total       Float
+  createdAt   DateTime @default(now())
+
+  purchase    Purchase @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
+  product     Product  @relation(fields: [productId], references: [id])
+}
+
+model ServiceJob {
+  id            String       @id @default(cuid())
+  jobNo         String       @unique
+  customerId    String?
+  userId        String
+  deviceName    String
+  deviceModel   String?
+  imei          String?
+  serialNo      String?
+  issue         String
+  status        RepairStatus @default(PENDING)
+  estimatedCost Float?
+  actualCost    Float?
+  estimatedDate DateTime?
+  completedDate DateTime?
+  deliveredDate DateTime?
+  warranty      String?
+  notes         String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  customer      Customer?    @relation(fields: [customerId], references: [id])
+  user          User         @relation(fields: [userId], references: [id])
+  items         ServiceItem[]
+}
+
+model ServiceItem {
+  id          String   @id @default(cuid())
+  serviceId   String
+  productId   String?
+  name        String
+  quantity    Int      @default(1)
+  unitPrice   Float
+  total       Float
+  createdAt   DateTime @default(now())
+
+  service     ServiceJob @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  product     Product?   @relation(fields: [productId], references: [id])
+}
+
+model Transaction {
+  id            String          @id @default(cuid())
+  type          TransactionType
+  saleId        String?
+  purchaseId    String?
+  supplierId    String?
+  userId        String
+  amount        Float
+  paymentMode   PaymentMode
+  referenceNo   String?
+  notes         String?
+  createdAt     DateTime        @default(now())
+
+  sale          Sale?           @relation(fields: [saleId], references: [id])
+  purchase      Purchase?       @relation(fields: [purchaseId], references: [id])
+  supplier      Supplier?       @relation(fields: [supplierId], references: [id])
+  user          User            @relation(fields: [userId], references: [id])
+}
+
+model StockMovement {
+  id          String   @id @default(cuid())
+  productId   String
+  type        String   // in, out, adjustment, return
+  quantity    Int
+  reason      String?
+  referenceId String?  // saleId, purchaseId, etc.
+  userId      String?
+  createdAt   DateTime @default(now())
+
+  product     Product  @relation(fields: [productId], references: [id])
+}
