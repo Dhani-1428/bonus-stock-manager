@@ -1,7 +1,7 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
-import { motion, useScroll, useTransform, useInView } from "framer-motion"
+import { useRef } from "react"
+import { motion, useInView } from "framer-motion"
 import {
   ScanBarcode,
   BarChart3,
@@ -210,28 +210,14 @@ function FeatureCard({ feature, index }: { feature: typeof features[0]; index: n
 }
 
 export function FeaturesSection() {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end start"],
-  })
-
-  const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0, 1, 1, 0])
-  const scale = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0.8, 1, 1, 0.8])
-  const y = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [100, 0, 0, -100])
-
   return (
     <section
       id="features"
-      className="relative py-24 lg:py-32 scroll-mt-24 overflow-hidden"
-      ref={containerRef}
+      className="relative py-24 lg:py-32 scroll-mt-24"
     >
       <div className="max-w-7xl mx-auto px-6">
-        {/* Section heading with scroll animation */}
-        <motion.div
-          className="text-center mb-16"
-          style={{ opacity, scale, y }}
-        >
+        {/* Section heading */}
+        <div className="text-center mb-16">
           <p className="text-sm font-semibold text-primary uppercase tracking-wider mb-3">
             Features
           </p>
@@ -242,7 +228,7 @@ export function FeaturesSection() {
             From barcode scanning to detailed analytics, StockPulse gives you the
             complete toolkit to manage inventory like a pro.
           </p>
-        </motion.div>
+        </div>
 
         {/* Features grid - Responsive card layout with scroll animations */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
