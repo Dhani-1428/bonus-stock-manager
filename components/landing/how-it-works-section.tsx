@@ -1,7 +1,7 @@
 "use client"
 
 import { UserPlus, Package, ScanBarcode, TrendingUp } from "lucide-react"
-import { CardSpotlight } from "@/components/ui/card-spotlight"
+import { GlareCard } from "@/components/ui/glare-card"
 
 const steps = [
   {
@@ -61,7 +61,7 @@ export function HowItWorksSection() {
                 {i < steps.length - 1 && (
                   <div className="hidden lg:block absolute top-10 left-[60%] w-[calc(100%-20%)] h-px border-t border-dashed border-border z-0" />
                 )}
-                <CardSpotlight className="text-center group">
+                <GlareCard className="text-center group">
                   <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-primary/10 mb-5 group-hover:bg-primary/20 transition-colors relative z-20">
                     <Icon className="w-8 h-8 text-primary" />
                   </div>
@@ -75,7 +75,7 @@ export function HowItWorksSection() {
                   <p className="text-sm text-muted-foreground leading-relaxed max-w-xs mx-auto relative z-20">
                     {step.description}
                   </p>
-                </CardSpotlight>
+                </GlareCard>
               </div>
             )
           })}

@@ -24,7 +24,7 @@ import {
   Calendar,
   Settings,
 } from "lucide-react"
-import { CardSpotlight } from "@/components/ui/card-spotlight"
+import { GlareCard } from "@/components/ui/glare-card"
 
 const features = [
   {
@@ -177,7 +177,7 @@ function FeatureCard({ feature, index }: { feature: typeof features[0]; index: n
       className="h-full m-2 sm:m-3"
       style={{ perspective: 1000 }}
     >
-      <CardSpotlight 
+      <GlareCard 
         ref={cardRef}
         className="group h-full hover:neon-glow cursor-default transition-all duration-300 transform-3d"
         style={{ transformStyle: "preserve-3d" }}
@@ -204,7 +204,7 @@ function FeatureCard({ feature, index }: { feature: typeof features[0]; index: n
             {feature.description}
           </p>
         </div>
-      </CardSpotlight>
+      </GlareCard>
     </motion.div>
   )
 }

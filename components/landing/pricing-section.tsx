@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { Check } from "lucide-react"
-import { CardSpotlight } from "@/components/ui/card-spotlight"
+import { GlareCard } from "@/components/ui/glare-card"
 
 const handleCard3D = (e: React.MouseEvent<HTMLDivElement>, card: HTMLDivElement) => {
   const rect = card.getBoundingClientRect()
@@ -94,7 +94,7 @@ export function PricingSection() {
         {/* Pricing cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 items-start perspective-3d">
           {plans.map((plan) => (
-            <CardSpotlight
+            <GlareCard
               key={plan.name}
               className={`relative transition-all ${
                 plan.featured
@@ -141,7 +141,7 @@ export function PricingSection() {
                   </li>
                 ))}
               </ul>
-            </CardSpotlight>
+            </GlareCard>
           ))}
         </div>
       </div>
