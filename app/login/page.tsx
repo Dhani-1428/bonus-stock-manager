@@ -1,11 +1,14 @@
 "use client"
 
 import { SignIn } from "@clerk/nextjs"
+import { ClerkProvider } from "@clerk/nextjs"
 import Link from "next/link"
 import { Package } from "lucide-react"
 
 export default function LoginPage() {
-  return (
+  const clerkKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+
+  const content = (
     <main className="min-h-screen bg-background flex items-center justify-center px-4 py-12">
       {/* Background effects */}
       <div className="fixed inset-0 pointer-events-none">
@@ -25,27 +28,33 @@ export default function LoginPage() {
         </Link>
 
         {/* Clerk Sign In */}
-        <div className="flex justify-center">
-          <SignIn
-            appearance={{
-              elements: {
-                rootBox: "mx-auto",
-                card: "glass rounded-2xl shadow-none border border-border",
-                headerTitle: "text-foreground",
-                headerSubtitle: "text-muted-foreground",
-                socialButtonsBlockButton: "bg-secondary hover:bg-secondary/80 text-foreground border-border",
-                formButtonPrimary: "bg-primary hover:bg-primary/90 text-primary-foreground",
-                formFieldInput: "bg-secondary border-border text-foreground",
-                formFieldLabel: "text-muted-foreground",
-                footerActionLink: "text-primary hover:text-primary/80",
-              },
-            }}
-            routing="path"
-            path="/login"
-            signUpUrl="/signup"
-            afterSignInUrl="/dashboard"
-          />
-        </div>
+        {clerkKey ? (
+          <div className="flex justify-center">
+            <SignIn
+              appearance={{
+                elements: {
+                  rootBox: "mx-auto",
+                  card: "glass rounded-2xl shadow-none border border-border",
+                  headerTitle: "text-foreground",
+                  headerSubtitle: "text-muted-foreground",
+                  socialButtonsBlockButton: "bg-secondary hover:bg-secondary/80 text-foreground border-border",
+                  formButtonPrimary: "bg-primary hover:bg-primary/90 text-primary-foreground",
+                  formFieldInput: "bg-secondary border-border text-foreground",
+                  formFieldLabel: "text-muted-foreground",
+                  footerActionLink: "text-primary hover:text-primary/80",
+                },
+              }}
+              routing="path"
+              path="/login"
+              signUpUrl="/signup"
+              afterSignInUrl="/dashboard"
+            />
+          </div>
+        ) : (
+          <div className="glass rounded-2xl p-8 text-center">
+            <p className="text-muted-foreground">Clerk authentication is not configured. Please set NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY.</p>
+          </div>
+        )}
 
         {/* Back to home */}
         <p className="text-center mt-6">
@@ -56,4 +65,11 @@ export default function LoginPage() {
       </div>
     </main>
   )
+
+  // Wrap in ClerkProvider if key exists, otherwise return content directly
+  if (clerkKey) {
+    return <ClerkProvider publishableKey={clerkKey}>{content}</ClerkProvider>
+  }
+
+  return content
 }
