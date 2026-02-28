@@ -10,75 +10,129 @@ import {
   Smartphone,
   Cloud,
   FileSpreadsheet,
+  Users,
+  ShoppingCart,
+  Wrench,
+  TrendingUp,
+  QrCode,
+  Receipt,
+  CreditCard,
+  Database,
+  Download,
+  AlertTriangle,
+  Calendar,
+  Settings,
 } from "lucide-react"
 import { CardSpotlight } from "@/components/ui/card-spotlight"
-
-const handleCard3D = (e: React.MouseEvent<HTMLDivElement>, card: HTMLDivElement) => {
-  const rect = card.getBoundingClientRect()
-  const x = e.clientX - rect.left
-  const y = e.clientY - rect.top
-
-  const centerX = rect.width / 2
-  const centerY = rect.height / 2
-
-  const rotateX = (y - centerY) / 10
-  const rotateY = (centerX - x) / 10
-
-  card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(10px)`
-}
-
-const resetCard3D = (card: HTMLDivElement) => {
-  card.style.transform = "perspective(1000px) rotateX(0) rotateY(0) translateZ(0)"
-}
 
 const features = [
   {
     icon: ScanBarcode,
     title: "Barcode Scanning",
-    description:
-      "Instantly scan product barcodes to check stock, update inventory, or process sales. Works with any standard barcode format.",
+    description: "Instantly scan product barcodes using your device camera. Check stock, update inventory, or process sales with a single scan.",
+    color: "from-blue-500 to-cyan-500",
+  },
+  {
+    icon: QrCode,
+    title: "QR Code Generation",
+    description: "Generate QR codes for products with embedded product information. Perfect for quick product lookup and inventory tracking.",
+    color: "from-purple-500 to-pink-500",
+  },
+  {
+    icon: Package,
+    title: "Inventory Management",
+    description: "Complete product CRUD operations. Organize by categories, track variants (color, storage, RAM), and manage stock levels efficiently.",
+    color: "from-green-500 to-emerald-500",
+  },
+  {
+    icon: ShoppingCart,
+    title: "POS System",
+    description: "Fast billing interface with product search, barcode scanning, discount/tax calculation, and multiple payment modes (Cash, UPI, Card).",
+    color: "from-orange-500 to-red-500",
+  },
+  {
+    icon: Receipt,
+    title: "Invoice Generation",
+    description: "Generate professional PDF invoices instantly. Download or print invoices with complete transaction details and customer information.",
+    color: "from-indigo-500 to-blue-500",
+  },
+  {
+    icon: Users,
+    title: "Customer Management",
+    description: "Store customer details, track purchase history, manage warranties, and build long-term customer relationships.",
+    color: "from-teal-500 to-cyan-500",
+  },
+  {
+    icon: Database,
+    title: "Suppliers & Purchases",
+    description: "Manage supplier information, track purchase orders, monitor supplier dues, and automatically update stock on purchase entry.",
+    color: "from-amber-500 to-yellow-500",
+  },
+  {
+    icon: Wrench,
+    title: "Service & Repairs",
+    description: "Create job cards for device repairs, track repair status, manage warranty claims, and estimate costs for service jobs.",
+    color: "from-violet-500 to-purple-500",
   },
   {
     icon: BarChart3,
     title: "Sales Analytics",
-    description:
-      "Detailed daily, weekly, and monthly sales reports with visual charts. Track revenue, profit margins, and top-selling products.",
+    description: "Detailed daily, weekly, and monthly sales reports with visual charts. Track revenue, profit margins, and top-selling products.",
+    color: "from-rose-500 to-pink-500",
   },
   {
-    icon: Package,
-    title: "Stock Management",
-    description:
-      "Add, edit, and organize products by category. Track buy/sell prices, warranty info, supplier details, and more.",
+    icon: TrendingUp,
+    title: "Profit & Loss Reports",
+    description: "Comprehensive financial reports showing profit margins, expenses, and revenue trends. Export to CSV or PDF for accounting.",
+    color: "from-emerald-500 to-green-500",
   },
   {
-    icon: Bell,
-    title: "Smart Alerts",
-    description:
-      "Get notified when stock runs low. Set custom minimum thresholds per product so you never miss a restock.",
+    icon: AlertTriangle,
+    title: "Low Stock Alerts",
+    description: "Get notified when stock runs low. Set custom minimum thresholds per product so you never miss a restock opportunity.",
+    color: "from-red-500 to-orange-500",
+  },
+  {
+    icon: Calendar,
+    title: "Expiry Date Tracking",
+    description: "Track expiry dates for accessories and perishable items. Get alerts before products expire to minimize waste.",
+    color: "from-sky-500 to-blue-500",
   },
   {
     icon: ShieldCheck,
     title: "Role-Based Access",
-    description:
-      "Admin and staff roles with different permission levels. Admins manage everything; staff handle day-to-day sales.",
+    description: "Admin and staff roles with different permission levels. Owners manage everything; staff handle day-to-day sales operations.",
+    color: "from-lime-500 to-green-500",
   },
   {
     icon: Smartphone,
-    title: "Mobile First",
-    description:
-      "Designed for use on phones and tablets at the shop counter. Fast, responsive, and works offline when needed.",
+    title: "Mobile First Design",
+    description: "Designed for use on phones and tablets at the shop counter. Fast, responsive, and optimized for touch interactions.",
+    color: "from-fuchsia-500 to-pink-500",
   },
   {
     icon: Cloud,
-    title: "Cloud Sync",
-    description:
-      "All your data synced securely to the cloud. Access your inventory from any device, anywhere, anytime.",
+    title: "Cloud Sync Ready",
+    description: "Architecture ready for cloud synchronization. Access your inventory from any device, anywhere, with secure data backup.",
+    color: "from-cyan-500 to-blue-500",
   },
   {
-    icon: FileSpreadsheet,
-    title: "Export & Reports",
-    description:
-      "Export your inventory and sales data to PDF or Excel. Generate professional reports for accounting and analysis.",
+    icon: Download,
+    title: "Data Export",
+    description: "Export your inventory and sales data to PDF or CSV. Generate professional reports for accounting, tax filing, and analysis.",
+    color: "from-slate-500 to-gray-500",
+  },
+  {
+    icon: CreditCard,
+    title: "Multiple Payment Modes",
+    description: "Support for Cash, UPI, Credit/Debit Cards, and other payment methods. Track payment status and manage returns/refunds.",
+    color: "from-blue-600 to-indigo-600",
+  },
+  {
+    icon: Settings,
+    title: "IMEI/Serial Tracking",
+    description: "Track IMEI and serial numbers for mobile phones. Perfect for warranty management and device identification.",
+    color: "from-gray-600 to-slate-600",
   },
 ]
 
@@ -108,7 +162,7 @@ export function FeaturesSection() {
 
   return (
     <section id="features" className="relative py-24 lg:py-32 scroll-mt-24">
-      <div className="max-w-6xl mx-auto px-6">
+      <div className="max-w-7xl mx-auto px-6">
         {/* Section heading */}
         <div className="text-center mb-16">
           <p className="text-sm font-semibold text-primary uppercase tracking-wider mb-3">
@@ -123,38 +177,47 @@ export function FeaturesSection() {
           </p>
         </div>
 
-        {/* Features grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 perspective-3d">
+        {/* Features grid - Responsive card layout */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {features.map((feature, i) => {
             const Icon = feature.icon
             return (
-              <CardSpotlight
+              <div
                 key={feature.title}
-                className={`group transition-all duration-500 hover:neon-glow cursor-default ${
+                ref={(el) => {
+                  cardsRef.current[i] = el
+                }}
+                data-index={i}
+                className={`transition-all duration-500 ${
                   visibleCards.has(i)
                     ? "opacity-100 translate-y-0"
                     : "opacity-0 translate-y-8"
                 }`}
-                style={{ 
-                  transitionDelay: `${i * 80}ms`,
-                }}
+                style={{ transitionDelay: `${i * 50}ms` }}
               >
-                <div 
-                  className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors relative z-20"
+                <CardSpotlight
+                  className="group h-full hover:neon-glow cursor-default transition-all duration-300"
                 >
-                  <Icon className="w-6 h-6 text-primary" />
-                </div>
-                <h3 
-                  className="text-base font-semibold text-foreground mb-2 relative z-20"
-                >
-                  {feature.title}
-                </h3>
-                <p 
-                  className="text-sm text-muted-foreground leading-relaxed relative z-20"
-                >
-                  {feature.description}
-                </p>
-              </CardSpotlight>
+                  <div className="relative z-20">
+                    {/* Icon with gradient background */}
+                    <div 
+                      className={`w-14 h-14 rounded-xl bg-gradient-to-br ${feature.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg`}
+                    >
+                      <Icon className="w-7 h-7 text-white" />
+                    </div>
+                    
+                    {/* Title */}
+                    <h3 className="text-lg font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
+                      {feature.title}
+                    </h3>
+                    
+                    {/* Description */}
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      {feature.description}
+                    </p>
+                  </div>
+                </CardSpotlight>
+              </div>
             )
           })}
         </div>
