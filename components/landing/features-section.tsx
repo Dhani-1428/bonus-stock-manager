@@ -139,8 +139,30 @@ const features = [
 
 function FeatureCard({ feature, index }: { feature: typeof features[0]; index: number }) {
   const ref = useRef<HTMLDivElement>(null)
+  const cardRef = useRef<HTMLDivElement>(null)
   const isInView = useInView(ref, { once: true, margin: "-100px" })
   const Icon = feature.icon
+
+  const handleCard3D = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!cardRef.current) return
+    const card = cardRef.current
+    const rect = card.getBoundingClientRect()
+    const x = e.clientX - rect.left
+    const y = e.clientY - rect.top
+
+    const centerX = rect.width / 2
+    const centerY = rect.height / 2
+
+    const rotateX = (y - centerY) / 30
+    const rotateY = (centerX - x) / 30
+
+    card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(10px)`
+  }
+
+  const resetCard3D = () => {
+    if (!cardRef.current) return
+    cardRef.current.style.transform = "perspective(1000px) rotateX(0) rotateY(0) translateZ(0)"
+  }
 
   return (
     <motion.div
@@ -155,7 +177,13 @@ function FeatureCard({ feature, index }: { feature: typeof features[0]; index: n
       className="h-full"
       style={{ perspective: 1000 }}
     >
-      <CardSpotlight className="group h-full hover:neon-glow cursor-default transition-all duration-300">
+      <CardSpotlight 
+        ref={cardRef}
+        className="group h-full hover:neon-glow cursor-default transition-all duration-300 transform-3d"
+        style={{ transformStyle: "preserve-3d" }}
+        onMouseMove={handleCard3D}
+        onMouseLeave={resetCard3D}
+      >
         <div className="relative z-20 p-6">
           {/* Icon with gradient background */}
           <motion.div

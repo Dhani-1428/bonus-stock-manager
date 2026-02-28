@@ -6,49 +6,66 @@ import { cn } from "@/lib/utils"
 interface CardSpotlightProps {
   children: React.ReactNode
   className?: string
+  onMouseMove?: (e: React.MouseEvent<HTMLDivElement>) => void
+  onMouseLeave?: () => void
 }
 
-export function CardSpotlight({ children, className }: CardSpotlightProps) {
-  const divRef = useRef<HTMLDivElement>(null)
-  const [position, setPosition] = useState({ x: 0, y: 0 })
-  const [opacity, setOpacity] = useState(0)
+export const CardSpotlight = React.forwardRef<HTMLDivElement, CardSpotlightProps>(
+  ({ children, className, onMouseMove, onMouseLeave }, ref) => {
+    const divRef = useRef<HTMLDivElement>(null)
+    const [position, setPosition] = useState({ x: 0, y: 0 })
+    const [opacity, setOpacity] = useState(0)
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!divRef.current) return
+    // Use forwarded ref or internal ref
+    const cardRef = (ref as React.RefObject<HTMLDivElement>) || divRef
 
-    const div = divRef.current
-    const rect = div.getBoundingClientRect()
+    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+      if (!cardRef.current) return
 
-    setPosition({ x: e.clientX - rect.left, y: e.clientY - rect.top })
-  }
+      const div = cardRef.current
+      const rect = div.getBoundingClientRect()
 
-  const handleMouseEnter = () => {
-    setOpacity(1)
-  }
+      setPosition({ x: e.clientX - rect.left, y: e.clientY - rect.top })
+      
+      // Call external onMouseMove if provided
+      if (onMouseMove) {
+        onMouseMove(e)
+      }
+    }
 
-  const handleMouseLeave = () => {
-    setOpacity(0)
-  }
+    const handleMouseEnter = () => {
+      setOpacity(1)
+    }
 
-  return (
-    <div
-      ref={divRef}
-      onMouseMove={handleMouseMove}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      className={cn(
-        "relative rounded-3xl border border-border/50 bg-card overflow-hidden",
-        className
-      )}
-    >
+    const handleMouseLeave = () => {
+      setOpacity(0)
+      if (onMouseLeave) {
+        onMouseLeave()
+      }
+    }
+
+    return (
       <div
-        className="pointer-events-none absolute -inset-px opacity-0 transition-opacity duration-500"
-        style={{
-          opacity,
-          background: `radial-gradient(600px circle at ${position.x}px ${position.y}px, rgba(120, 119, 198, 0.15), transparent 40%)`,
-        }}
-      />
-      {children}
-    </div>
-  )
-}
+        ref={cardRef}
+        onMouseMove={handleMouseMove}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        className={cn(
+          "relative rounded-3xl border border-border/50 bg-card overflow-hidden",
+          className
+        )}
+      >
+        <div
+          className="pointer-events-none absolute -inset-px opacity-0 transition-opacity duration-500"
+          style={{
+            opacity,
+            background: `radial-gradient(600px circle at ${position.x}px ${position.y}px, rgba(120, 119, 198, 0.15), transparent 40%)`,
+          }}
+        />
+        {children}
+      </div>
+    )
+  }
+)
+
+CardSpotlight.displayName = "CardSpotlight"
