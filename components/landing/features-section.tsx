@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { motion, useScroll, useTransform } from "framer-motion"
+import { motion, useScroll, useTransform, useInView } from "framer-motion"
 import {
   ScanBarcode,
   BarChart3,
@@ -137,6 +137,50 @@ const features = [
   },
 ]
 
+function FeatureCard({ feature, index }: { feature: typeof features[0]; index: number }) {
+  const ref = useRef<HTMLDivElement>(null)
+  const isInView = useInView(ref, { once: true, margin: "-100px" })
+  const Icon = feature.icon
+
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, y: 50, rotateX: 10 }}
+      animate={isInView ? { opacity: 1, y: 0, rotateX: 0 } : { opacity: 0, y: 50, rotateX: 10 }}
+      transition={{
+        duration: 0.6,
+        delay: index * 0.1,
+        ease: [0.21, 1.11, 0.81, 0.99],
+      }}
+      className="h-full"
+      style={{ perspective: 1000 }}
+    >
+      <CardSpotlight className="group h-full hover:neon-glow cursor-default transition-all duration-300">
+        <div className="relative z-20 p-6">
+          {/* Icon with gradient background */}
+          <motion.div
+            className={`w-14 h-14 rounded-xl bg-gradient-to-br ${feature.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg`}
+            whileHover={{ rotate: 360 }}
+            transition={{ duration: 0.5 }}
+          >
+            <Icon className="w-7 h-7 text-white" />
+          </motion.div>
+
+          {/* Title */}
+          <h3 className="text-lg font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
+            {feature.title}
+          </h3>
+
+          {/* Description */}
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            {feature.description}
+          </p>
+        </div>
+      </CardSpotlight>
+    </motion.div>
+  )
+}
+
 export function FeaturesSection() {
   const containerRef = useRef<HTMLDivElement>(null)
   const { scrollYProgress } = useScroll({
@@ -149,14 +193,14 @@ export function FeaturesSection() {
   const y = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [100, 0, 0, -100])
 
   return (
-    <section 
-      id="features" 
+    <section
+      id="features"
       className="relative py-24 lg:py-32 scroll-mt-24 overflow-hidden"
       ref={containerRef}
     >
       <div className="max-w-7xl mx-auto px-6">
-        {/* Section heading */}
-        <motion.div 
+        {/* Section heading with scroll animation */}
+        <motion.div
           className="text-center mb-16"
           style={{ opacity, scale, y }}
         >
@@ -174,59 +218,9 @@ export function FeaturesSection() {
 
         {/* Features grid - Responsive card layout with scroll animations */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {features.map((feature, i) => {
-            const Icon = feature.icon
-            
-            // Calculate scroll progress for each card
-            const cardScrollProgress = useTransform(
-              scrollYProgress,
-              [i * 0.05, (i + 1) * 0.05],
-              [0, 1]
-            )
-            
-            const cardOpacity = useTransform(cardScrollProgress, [0, 0.3, 0.7, 1], [0, 1, 1, 1])
-            const cardScale = useTransform(cardScrollProgress, [0, 0.3, 0.7, 1], [0.8, 1, 1, 1])
-            const cardY = useTransform(cardScrollProgress, [0, 0.3, 0.7, 1], [50, 0, 0, 0])
-            const cardRotate = useTransform(cardScrollProgress, [0, 0.3, 0.7, 1], [5, 0, 0, 0])
-
-            return (
-              <motion.div
-                key={feature.title}
-                style={{
-                  opacity: cardOpacity,
-                  scale: cardScale,
-                  y: cardY,
-                  rotateX: cardRotate,
-                }}
-                className="h-full"
-              >
-                <CardSpotlight
-                  className="group h-full hover:neon-glow cursor-default transition-all duration-300"
-                >
-                  <div className="relative z-20 p-6">
-                    {/* Icon with gradient background */}
-                    <motion.div 
-                      className={`w-14 h-14 rounded-xl bg-gradient-to-br ${feature.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg`}
-                      whileHover={{ rotate: 360 }}
-                      transition={{ duration: 0.5 }}
-                    >
-                      <Icon className="w-7 h-7 text-white" />
-                    </motion.div>
-                    
-                    {/* Title */}
-                    <h3 className="text-lg font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
-                      {feature.title}
-                    </h3>
-                    
-                    {/* Description */}
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      {feature.description}
-                    </p>
-                  </div>
-                </CardSpotlight>
-              </motion.div>
-            )
-          })}
+          {features.map((feature, i) => (
+            <FeatureCard key={feature.title} feature={feature} index={i} />
+          ))}
         </div>
       </div>
     </section>
