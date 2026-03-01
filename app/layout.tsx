@@ -62,7 +62,7 @@ export default function RootLayout({
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body className="font-sans antialiased min-h-screen relative overflow-x-hidden">
         {clerkPublishableKey ? (
-          <ClerkProvider>
+          <ClerkProvider publishableKey={clerkPublishableKey}>
             {children}
           </ClerkProvider>
         ) : (
