@@ -101,24 +101,25 @@ export function PricingSection() {
             }
 
             return (
-              <GlareCard
-                key={plan.name}
-                ref={cardRef}
-                className={`relative transition-all h-full transform-3d ${
-                  plan.featured
-                    ? "neon-glow border-primary/50"
-                    : ""
-                }`}
-                style={{ transformStyle: "preserve-3d" }}
-                onMouseMove={handleCard3D}
-                onMouseLeave={resetCard3D}
-              >
-                <div className="relative z-20 p-6 sm:p-8 lg:p-10 flex flex-col h-full">
-                  {plan.featured && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-primary text-primary-foreground text-xs font-semibold z-30">
-                      Most Popular
-                    </div>
-                  )}
+              <div className="relative">
+                {plan.featured && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-primary text-primary-foreground text-xs font-semibold z-30 shadow-lg">
+                    Most Popular
+                  </div>
+                )}
+                <GlareCard
+                  key={plan.name}
+                  ref={cardRef}
+                  className={`relative transition-all h-full transform-3d ${
+                    plan.featured
+                      ? "neon-glow border-primary/50"
+                      : ""
+                  }`}
+                  style={{ transformStyle: "preserve-3d" }}
+                  onMouseMove={handleCard3D}
+                  onMouseLeave={resetCard3D}
+                >
+                  <div className={`relative z-20 flex flex-col h-full ${plan.featured ? "pt-8" : ""} p-6 sm:p-8 lg:p-10`}>
 
                   <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-2">
                     {plan.name}
@@ -153,8 +154,9 @@ export function PricingSection() {
                       </li>
                     ))}
                   </ul>
-                </div>
-              </GlareCard>
+                  </div>
+                </GlareCard>
+              </div>
             )
           })}
         </div>
