@@ -40,25 +40,9 @@ interface AppContextType extends AppState {
 
 const AppContext = createContext<AppContextType | null>(null)
 
-// Lazy load Clerk hooks to avoid build-time errors
-let clerkHooks: { useUser: any; useAuth: any } | null = null
-
-function getClerkHooks() {
-  if (typeof window === 'undefined') {
-    return null
-  }
-  
-  if (!clerkHooks) {
-    try {
-      clerkHooks = require('@clerk/nextjs')
-    } catch (error) {
-      // Clerk not available
-      return null
-    }
-  }
-  
-  return clerkHooks
-}
+// Import Clerk hooks directly - they're safe to use in client components
+// Next.js will handle code splitting automatically
+import { useUser as useClerkUserHook, useAuth as useClerkAuthHook } from '@clerk/nextjs'
 
 // Safe Clerk hooks that handle missing ClerkProvider
 function useClerkUser() {
@@ -70,25 +54,21 @@ function useClerkUser() {
     return { user: null, isLoaded: true }
   }
 
-  // Use dynamic import to avoid build-time errors and handle missing ClerkProvider
+  // During SSR, return loading state
   if (typeof window === 'undefined') {
     return { user: null, isLoaded: false }
   }
 
-  const hooks = getClerkHooks()
-  if (!hooks) {
-    return { user: null, isLoaded: true }
-  }
-
   try {
-    return hooks.useUser()
+    // Use Clerk hook directly - ClerkProvider check is handled by Clerk internally
+    return useClerkUserHook()
   } catch (error: any) {
     // If Clerk is not available or not in ClerkProvider, return safe defaults
+    // This should rarely happen as Clerk hooks handle ClerkProvider checks
     if (error?.message?.includes('ClerkProvider') || error?.message?.includes('useUser')) {
-      // Silently return defaults if ClerkProvider is missing
       return { user: null, isLoaded: true }
     }
-    // Don't log errors in production to avoid console spam
+    // Log only in development
     if (process.env.NODE_ENV === 'development') {
       console.error('Clerk useUser error:', error)
     }
@@ -105,25 +85,20 @@ function useClerkAuth() {
     return { signOut: async () => {} }
   }
 
-  // Use dynamic import to avoid build-time errors and handle missing ClerkProvider
+  // During SSR, return no-op
   if (typeof window === 'undefined') {
     return { signOut: async () => {} }
   }
 
-  const hooks = getClerkHooks()
-  if (!hooks) {
-    return { signOut: async () => {} }
-  }
-
   try {
-    return hooks.useAuth()
+    // Use Clerk hook directly - ClerkProvider check is handled by Clerk internally
+    return useClerkAuthHook()
   } catch (error: any) {
     // If Clerk is not available or not in ClerkProvider, return safe defaults
     if (error?.message?.includes('ClerkProvider') || error?.message?.includes('useAuth')) {
-      // Silently return defaults if ClerkProvider is missing
       return { signOut: async () => {} }
     }
-    // Don't log errors in production to avoid console spam
+    // Log only in development
     if (process.env.NODE_ENV === 'development') {
       console.error('Clerk useAuth error:', error)
     }
