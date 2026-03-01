@@ -43,7 +43,7 @@ const AppContext = createContext<AppContextType | null>(null)
 // Safe Clerk hooks that handle missing ClerkProvider
 function useClerkUser() {
   const clerkKey = typeof window !== 'undefined' 
-    ? (window as any).__CLERK_PUBLISHABLE_KEY__ || process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+    ? process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
     : process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
 
   if (!clerkKey) {
@@ -51,17 +51,22 @@ function useClerkUser() {
   }
 
   try {
-    // Dynamic import to avoid build-time errors
+    // Use dynamic import to avoid build-time errors
     const { useUser } = require('@clerk/nextjs')
-    return useUser()
+    // Only call useUser if we're in a client component with ClerkProvider
+    if (typeof window !== 'undefined') {
+      return useUser()
+    }
+    return { user: null, isLoaded: true }
   } catch (error) {
+    // If Clerk is not available or not in ClerkProvider, return safe defaults
     return { user: null, isLoaded: true }
   }
 }
 
 function useClerkAuth() {
   const clerkKey = typeof window !== 'undefined' 
-    ? (window as any).__CLERK_PUBLISHABLE_KEY__ || process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+    ? process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
     : process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
 
   if (!clerkKey) {
@@ -70,8 +75,13 @@ function useClerkAuth() {
 
   try {
     const { useAuth } = require('@clerk/nextjs')
-    return useAuth()
+    // Only call useAuth if we're in a client component with ClerkProvider
+    if (typeof window !== 'undefined') {
+      return useAuth()
+    }
+    return { signOut: async () => {} }
   } catch (error) {
+    // If Clerk is not available or not in ClerkProvider, return safe defaults
     return { signOut: async () => {} }
   }
 }
