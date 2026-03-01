@@ -3,7 +3,6 @@
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from "react"
 import { useRouter } from "next/navigation"
 import { apiClient } from "./api-client"
-import { useUser as useClerkUserHook, useAuth as useClerkAuthHook } from '@clerk/nextjs'
 
 export type Screen =
   | "dashboard"
@@ -51,11 +50,22 @@ function useClerkUser() {
     return { user: null, isLoaded: true }
   }
 
+  // Use dynamic import to avoid build-time errors and handle missing ClerkProvider
+  if (typeof window === 'undefined') {
+    return { user: null, isLoaded: false }
+  }
+
   try {
-    // Use Clerk hook directly - it will handle ClerkProvider check internally
-    return useClerkUserHook()
-  } catch (error) {
+    // Dynamically import Clerk hooks to avoid SSR issues
+    const { useUser } = require('@clerk/nextjs')
+    return useUser()
+  } catch (error: any) {
     // If Clerk is not available or not in ClerkProvider, return safe defaults
+    // This can happen if ClerkProvider is not wrapping the component
+    if (error?.message?.includes('ClerkProvider') || error?.message?.includes('useUser')) {
+      // Silently return defaults if ClerkProvider is missing
+      return { user: null, isLoaded: true }
+    }
     console.error('Clerk useUser error:', error)
     return { user: null, isLoaded: true }
   }
@@ -70,11 +80,21 @@ function useClerkAuth() {
     return { signOut: async () => {} }
   }
 
+  // Use dynamic import to avoid build-time errors and handle missing ClerkProvider
+  if (typeof window === 'undefined') {
+    return { signOut: async () => {} }
+  }
+
   try {
-    // Use Clerk hook directly - it will handle ClerkProvider check internally
-    return useClerkAuthHook()
-  } catch (error) {
+    // Dynamically import Clerk hooks to avoid SSR issues
+    const { useAuth } = require('@clerk/nextjs')
+    return useAuth()
+  } catch (error: any) {
     // If Clerk is not available or not in ClerkProvider, return safe defaults
+    if (error?.message?.includes('ClerkProvider') || error?.message?.includes('useAuth')) {
+      // Silently return defaults if ClerkProvider is missing
+      return { signOut: async () => {} }
+    }
     console.error('Clerk useAuth error:', error)
     return { signOut: async () => {} }
   }
