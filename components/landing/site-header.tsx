@@ -18,7 +18,7 @@ function NavItem({ link, mouseX, onNavClick }: { link: typeof navLinks[0]; mouse
   const [isHovered, setIsHovered] = useState(false)
   const ref = useRef<HTMLAnchorElement>(null)
 
-  const springConfig = { stiffness: 500, damping: 30 }
+  const springConfig = { stiffness: 400, damping: 25 }
   const scale = useSpring(1, springConfig)
   const rotate = useSpring(0, springConfig)
 
@@ -27,13 +27,14 @@ function NavItem({ link, mouseX, onNavClick }: { link: typeof navLinks[0]; mouse
     return val - bounds.x - bounds.width / 2
   })
 
-  const widthSync = useTransform(distance, [-150, 0, 150], [1, 1.1, 1])
-  const width = useSpring(widthSync, springConfig)
+  // Subtle scale based on mouse proximity
+  const scaleSync = useTransform(distance, [-200, 0, 200], [1, 1.05, 1])
+  const proximityScale = useSpring(scaleSync, springConfig)
 
   useEffect(() => {
     if (isHovered) {
-      scale.set(1.1)
-      rotate.set(2)
+      scale.set(1.08)
+      rotate.set(1.5)
     } else {
       scale.set(1)
       rotate.set(0)
@@ -47,20 +48,13 @@ function NavItem({ link, mouseX, onNavClick }: { link: typeof navLinks[0]; mouse
       onClick={(e) => onNavClick(e, link.href)}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      style={{ scale, rotate, width }}
-      className="relative text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer px-3 py-2 rounded-lg hover:bg-secondary/30 flex items-center justify-center"
+      style={{ 
+        scale: isHovered ? scale : proximityScale, 
+        rotate 
+      }}
+      className="relative text-sm font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer px-4 py-2 rounded-lg hover:bg-secondary/40 flex items-center justify-center whitespace-nowrap"
     >
-      <motion.span style={{ scale }}>{link.label}</motion.span>
-      {isHovered && (
-        <motion.div
-          initial={{ opacity: 0, y: 10, x: "-50%" }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 10 }}
-          className="absolute -top-10 left-1/2 -translate-x-1/2 whitespace-pre rounded-lg border border-border bg-popover px-2.5 py-1 text-xs font-medium text-popover-foreground shadow-lg backdrop-blur-sm z-50"
-        >
-          {link.label}
-        </motion.div>
-      )}
+      {link.label}
     </motion.a>
   )
 }
@@ -131,7 +125,7 @@ export function SiteHeader() {
 
           {/* Desktop nav */}
           <nav 
-            className="hidden lg:flex items-center gap-2"
+            className="hidden lg:flex items-center gap-1"
             onMouseMove={(e) => mouseX.set(e.clientX)}
             onMouseLeave={() => mouseX.set(Infinity)}
           >
