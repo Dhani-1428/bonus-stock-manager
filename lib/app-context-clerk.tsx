@@ -3,6 +3,7 @@
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from "react"
 import { useRouter } from "next/navigation"
 import { apiClient } from "./api-client"
+import { useUser as useClerkUserHook, useAuth as useClerkAuthHook } from '@clerk/nextjs'
 
 export type Screen =
   | "dashboard"
@@ -39,9 +40,6 @@ interface AppContextType extends AppState {
 }
 
 const AppContext = createContext<AppContextType | null>(null)
-
-// Import Clerk hooks directly - they're safe to use in client components
-import { useUser as useClerkUserHook, useAuth as useClerkAuthHook } from '@clerk/nextjs'
 
 // Safe Clerk hooks that handle missing ClerkProvider
 function useClerkUser() {
