@@ -58,9 +58,7 @@ export function TestimonialsSection() {
         </div>
 
         {/* Animated Testimonials */}
-        <div className="glass rounded-3xl p-8 md:p-12 lg:p-16">
-          <AnimatedTestimonials testimonials={testimonials} autoplay={true} />
-        </div>
+        <AnimatedTestimonials testimonials={testimonials} autoplay={true} />
       </div>
     </section>
   )
