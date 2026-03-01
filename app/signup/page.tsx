@@ -107,6 +107,7 @@ export default function SignupPage() {
                   colorText: "#ffffff",
                   colorTextSecondary: "rgba(255, 255, 255, 0.7)",
                   borderRadius: "0.75rem",
+                  colorInputBorder: "hsl(var(--primary))",
                 },
               }}
               routing="path"
