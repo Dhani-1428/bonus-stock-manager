@@ -40,6 +40,9 @@ interface AppContextType extends AppState {
 
 const AppContext = createContext<AppContextType | null>(null)
 
+// Import Clerk hooks directly - they're safe to use in client components
+import { useUser as useClerkUserHook, useAuth as useClerkAuthHook } from '@clerk/nextjs'
+
 // Safe Clerk hooks that handle missing ClerkProvider
 function useClerkUser() {
   const clerkKey = typeof window !== 'undefined' 
@@ -51,15 +54,11 @@ function useClerkUser() {
   }
 
   try {
-    // Use dynamic import to avoid build-time errors
-    const { useUser } = require('@clerk/nextjs')
-    // Only call useUser if we're in a client component with ClerkProvider
-    if (typeof window !== 'undefined') {
-      return useUser()
-    }
-    return { user: null, isLoaded: true }
+    // Use Clerk hook directly - it will handle ClerkProvider check internally
+    return useClerkUserHook()
   } catch (error) {
     // If Clerk is not available or not in ClerkProvider, return safe defaults
+    console.error('Clerk useUser error:', error)
     return { user: null, isLoaded: true }
   }
 }
@@ -74,14 +73,11 @@ function useClerkAuth() {
   }
 
   try {
-    const { useAuth } = require('@clerk/nextjs')
-    // Only call useAuth if we're in a client component with ClerkProvider
-    if (typeof window !== 'undefined') {
-      return useAuth()
-    }
-    return { signOut: async () => {} }
+    // Use Clerk hook directly - it will handle ClerkProvider check internally
+    return useClerkAuthHook()
   } catch (error) {
     // If Clerk is not available or not in ClerkProvider, return safe defaults
+    console.error('Clerk useAuth error:', error)
     return { signOut: async () => {} }
   }
 }
@@ -100,41 +96,50 @@ export function AppProvider({ children }: { children: ReactNode }) {
     loading: false, // Don't wait for Clerk during build
   })
 
-  // Sync Clerk user with Prisma on mount (only in browser)
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    
-    const syncUser = async () => {
-      if (userLoaded && user) {
-        try {
-          // Sync user with backend
-          await fetch('/api/users/sync', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              clerkId: user.id,
-              email: user.emailAddresses[0]?.emailAddress,
-              name: user.firstName && user.lastName 
-                ? `${user.firstName} ${user.lastName}` 
-                : user.firstName || user.username || 'User',
-              imageUrl: user.imageUrl,
-            }),
-          })
-        } catch (error) {
-          console.error('Failed to sync user:', error)
-        }
-      }
-    }
-
-    syncUser()
-  }, [user, userLoaded])
-
-  // Set loading state
+  // Set loading state immediately when user is loaded
   useEffect(() => {
     if (userLoaded) {
       setState((prev) => ({ ...prev, loading: false }))
+    } else if (typeof window !== 'undefined') {
+      // If we're in browser and user is not loaded yet, set loading to true
+      setState((prev) => ({ ...prev, loading: true }))
     }
   }, [userLoaded])
+
+  // Sync Clerk user with Prisma on mount (only in browser) - don't block UI
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    if (!userLoaded || !user) return
+    
+    // Sync user in background without blocking
+    const syncUser = async () => {
+      try {
+        // Sync user with backend
+        const response = await fetch('/api/users/sync', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            clerkId: user.id,
+            email: user.emailAddresses[0]?.emailAddress,
+            name: user.firstName && user.lastName 
+              ? `${user.firstName} ${user.lastName}` 
+              : user.firstName || user.username || 'User',
+            imageUrl: user.imageUrl,
+          }),
+        })
+        
+        if (!response.ok) {
+          console.warn('User sync failed:', await response.text())
+        }
+      } catch (error) {
+        // Don't block UI on sync errors
+        console.error('Failed to sync user:', error)
+      }
+    }
+
+    // Run sync in background
+    syncUser()
+  }, [user, userLoaded])
 
   const navigate = useCallback((screen: Screen) => {
     setState((prev) => ({ ...prev, previousScreen: prev.screen, screen }))

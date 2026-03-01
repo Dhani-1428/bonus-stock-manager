@@ -57,8 +57,22 @@ export function AppShell() {
   // If Clerk is not configured, allow access (for build time)
   const isLoggedIn = !clerkKey || (userLoaded && !!user)
 
-  // Show loading while checking auth (only if Clerk is configured)
-  if (clerkKey && (loading || !isLoggedIn)) {
+  // Show loading only if:
+  // 1. Clerk is configured AND
+  // 2. User is not loaded yet OR
+  // 3. Context is still loading (but only briefly)
+  // Don't block if user is loaded but context loading is true
+  if (clerkKey && !userLoaded) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    )
+  }
+
+  // If user is loaded but not logged in, redirect to login
+  if (clerkKey && userLoaded && !user) {
+    // Redirect handled by middleware, but show loading while redirecting
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
